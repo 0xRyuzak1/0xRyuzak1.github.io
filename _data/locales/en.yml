@@ -40,7 +40,7 @@ copyright:
     Except where otherwise noted, the blog posts on this site are licensed
     under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author.
 
-meta: '' # Adding what want to see next to "Some rights reserved." footer
+meta: 'See something wrong?  Want to contribute? <a href="https://github.com/0xRyuzak1/0xRyuzak1.github.io/tree/main/_posts">Edit this page 📝</a>' # Adding what want to see next to "Some rights reserved." footer
 
 not_found:
   statment: Sorry, we've misplaced that URL or it's pointing to something that doesn't exist.
