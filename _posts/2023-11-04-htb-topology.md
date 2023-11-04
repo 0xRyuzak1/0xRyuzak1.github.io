@@ -8,6 +8,10 @@ image: /assets/img/hackthebox/machines writeups/Topology/Cover.png
 ---
 
 
+## Summary
+
+Topology starts with a website for a Math department which conatins multi virtual hosts. LaTeX Vhost used to convert math functions into an images. By performing `Latex injection` to gain arbitrary file read, and get the `.htpassword` file for a dev vhost, which used the same password for the user on the machine. To get the root access, Abusing a cron running `gnuplot` to create file to gain command execution as root.
+
 ## Machine Info
 
 |                      |                                                                                                  |
@@ -21,9 +25,7 @@ image: /assets/img/hackthebox/machines writeups/Topology/Cover.png
 | **Retire Date**      |  04 Nov 2023                                                                                     |
 
 
-## Summary
 
-Topology starts with a website for a Math department which conatins multi virtual hosts. LaTeX Vhost used to convert math functions into an images. By performing `Latex injection` to gain arbitrary file read, and get the `.htpassword` file for a dev vhost, which used the same password for the user on the machine. To get the root access, Abusing a cron running `gnuplot` to create file to gain command execution as root.
 
 ## Recon
 
