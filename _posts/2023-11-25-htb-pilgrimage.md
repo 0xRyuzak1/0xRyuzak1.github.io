@@ -477,6 +477,6 @@ permitted by applicable law.
 Get the root.txt content
 
 ```console
-cat root.txt
+root@pilgrimage$ cat root.txt
 d3e8abcbae12********************
 ```
