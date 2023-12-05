@@ -397,7 +397,7 @@ One of the links in the dashboard is to `Changelog` (/dashboard/changelog):
 
 ![](/assets/img/hackthebox/machines writeups/Cybermonday/changelog.png)
 
-Which reveal There’s also a link to a webhook url on [http://webhooks-api-beta.cybermonday.htb/webhooks/fda96d32-e8c8-4301-8fb3-c821a316cf77](http://webhooks-api-beta.cybermonday.htb/webhooks/fda96d32-e8c8-4301-8fb3-c821a316cf77). That’s a new subdomain so let's add it to `/etc/hosts`
+Which reveal There’s also a link to a webhook url on [webhooks-api-beta.cybermonday.htb/webhooks/fda96d32-e8c8-4301-8fb3-c821a316cf77](http://webhooks-api-beta.cybermonday.htb/webhooks/fda96d32-e8c8-4301-8fb3-c821a316cf77). That’s a new subdomain so let's add it to `/etc/hosts`
 
 ```console
 (kali㉿kali)-[~]$ cat /etc/hosts                 
