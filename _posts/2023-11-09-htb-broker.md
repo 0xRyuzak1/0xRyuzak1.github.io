@@ -8,11 +8,11 @@ image: /assets/img/hackthebox/machines writeups/Broker/Cover.png
 ---
 
 
-## Summary
+## **Summary**
 
 Broker starts with a website that hosting a version of `Apache ActiveMQ`. Enumerating the version of `Apache ActiveMQ` shows that it is vulnerable to `Unauthenticated RCE`, which is leveraged to gain user access on the target. Post-exploitation enumeration reveals that the system has a `sudo` misconfiguration allowing the `activemq` user to execute `sudo /usr/sbin/nginx`.
 
-## Machine Info
+## **Machine Info**
 
 |                      |                                                                                                  |
 |:--------------------:|:------------------------------------------------------------------------------------------------:|
@@ -27,9 +27,9 @@ Broker starts with a website that hosting a version of `Apache ActiveMQ`. Enumer
 
 
 
-## Recon
+## **Recon**
 
-### Nmap
+### **Nmap**
 
 Using `Nmap` to enumerate all open ports and services by doing this on two phases to speed things up :
 
@@ -150,7 +150,7 @@ PORT      STATE  SERVICE    VERSION
 
 
 
-### HTTP Broker.htb - TCP 80
+### **HTTP Broker.htb - TCP 80**
 
 The home page of the website is require a basic auth.
 
@@ -161,9 +161,9 @@ By trying some defualt creds like ( admin , admin ) we can log in and found that
 ![](/assets/img/hackthebox/machines writeups/Broker/vuln-version.png)
 
 
-## Shell as activemq
+## **Shell as activemq**
 
-### Public Exploit
+### **Public Exploit**
 
 Searching for public exploits or CVE for this version and found that this version is vuln to `(CVE-2023–46604)`
 
@@ -172,7 +172,7 @@ Searching for public exploits or CVE for this version and found that this versio
 
 The vulnerability is an **Unauthenticated RCE** achived by exploiting a deserialization vulnerability in ActiveMQ then using a gadget from the Spring to load a remote XML file, which has the ability to run programs. For a more detailed look at this blog [post](https://deepkondah.medium.com/unpacking-the-apache-activemq-exploit-cve-2023-46604-92ed1c125b53).
 
-### Exploiting CVE-2023–46604
+### **Exploiting CVE-2023–46604**
 
 Using this exploit [POC](https://github.com/evkl1d/CVE-2023-46604) by giving it the target IP and target ActiveMQ port with the hosted url for the malcious XML file.
 
@@ -208,11 +208,11 @@ activemq@broker:/opt/apache-activemq-5.15.15/bin$ cat ~/user.txt
 574dca13a7f6********************
 ```
 
-## Shell as root
+## **Shell as root**
 
-### Enumeration
+### **Enumeration**
 
-#### Sudoers
+#### **Sudoers**
 
 Found that the activemq user can run `nginx` as `root` with no password
 
@@ -229,9 +229,9 @@ User activemq may run the following commands on broker:
     (ALL : ALL) NOPASSWD: /usr/sbin/nginx
 ```
 
-### Privelege Esclation
+### **Privelege Esclation**
 
-#### Nginx File Write
+#### **Nginx File Write**
 
 Creating a malicious nginx config file which will do the following :
 
@@ -264,7 +264,7 @@ activemq@broker:/opt/apache-activemq-5.15.15/bin$ netstat -ano |grep -i 8090
 tcp        0      0 0.0.0.0:8090            0.0.0.0:*               LISTEN      off (0.00/0/0)
 ```
 
-#### Authorized_keys
+#### **Authorized_keys**
 
 Generate pair of public-private keys on your attacker machine to be used to authenticate as root
 

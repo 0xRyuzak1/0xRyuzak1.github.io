@@ -8,11 +8,11 @@ image: /assets/img/hackthebox/machines writeups/Topology/Cover.png
 ---
 
 
-## Summary
+## **Summary**
 
 Topology starts with a website for a Math department which conatins multi virtual hosts. LaTeX Vhost used to convert math functions into an images. By performing `Latex injection` to gain arbitrary file read, and get the `.htpassword` file for a dev vhost, which used the same password for the user on the machine. To get the root access, Abusing a cron running `gnuplot` to create file to gain command execution as root.
 
-## Machine Info
+## **Machine Info**
 
 |                      |                                                                                                  |
 |:--------------------:|:------------------------------------------------------------------------------------------------:|
@@ -27,9 +27,9 @@ Topology starts with a website for a Math department which conatins multi virtua
 
 
 
-## Recon
+## **Recon**
 
-### Nmap
+### **Nmap**
 
 Using `Nmap` to enumerate all open ports and services by doing this on two phases to speed things up :
 
@@ -98,7 +98,7 @@ Nmap done: 1 IP address (1 host up) scanned in 18.55 seconds
 `nmap` finds four open TCP ports, **SSH (22)** and **HTTP (80)**
 
 
-### HTTP Topology.htb - TCP 80
+### **HTTP Topology.htb - TCP 80**
 
 The home page of the website is represent a Group of Profs for the Department of Mathematics and their research topics and software projects.
 
@@ -109,7 +109,7 @@ You an find the following on the home page :
 - The contact email on the page is `lklein@topology.htb` so this is a **potential user** and a **potential virtual hosting**.
 - A software project called **LaTeX Equation Generator** is redirect to this virtual host `latex.topology.htb`.
 
-#### Source Code
+#### **Source Code**
 
 After moving around in the home page and it's source code you can find a **potential users** : 
 
@@ -120,7 +120,7 @@ After moving around in the home page and it's source code you can find a **poten
 
 ![](/assets/img/hackthebox/machines writeups/Topology/potential-users.png)
 
-#### Virtual Hosting Enum
+#### **Virtual Hosting Enum**
 
 Using `fuff` to make Virtual hosting bruteforce found 3 differant Virtual hosts :
 - stats
@@ -130,20 +130,20 @@ Using `fuff` to make Virtual hosting bruteforce found 3 differant Virtual hosts 
 ![Virtual Host Enumeration](/assets/img/hackthebox/machines writeups/Topology/virtualhost-enum.png)
 
 
-### HTTP Dev.topology.htb - TCP 80
+### **HTTP Dev.topology.htb - TCP 80**
 
 The **Dev** one shows a basic auth trying some default creds like `admin:admin` not work.
 
 ![Dev Subdomain](/assets/img/hackthebox/machines writeups/Topology/basic-auth.png)
 
 
-### HTTP Latex.topology.htb - TCP 80
+### **HTTP Latex.topology.htb - TCP 80**
 
 It's a simple website used to create a .PNG file using [LaTeX](https://www.latex-project.org/about/).
 
 ![Latex Website](/assets/img/hackthebox/machines writeups/Topology/latex-page.png)
 
-#### LaTeX Injection
+#### **LaTeX Injection**
 
 Servers that convert LaTeX code to PDF , Image , etc can be affected by high vuln leads to allow attackers to do the follwoing :
 - Read file from the server file system
@@ -166,9 +166,7 @@ looking for users that allowed to get a shell like `/bin/bash`, `/bin/sh`, etc f
 
 Assuming that the webapp running using **vdaisley** user so trying to get the **user.txt** file in the **vdaisley** home directory but got nothing so this means the webapp is running with diff user like `www-data`
 
-#### htpasswd 
-
-
+#### **htpasswd **
 
 
 Return to **Dev** domain since it's require a basic auth so this is done on apache using `.htaccess` file and `.htpasswd` so trying to dump it's content on the following paths :
@@ -181,14 +179,14 @@ Return to **Dev** domain since it's require a basic auth so this is done on apac
 ![](/assets/img/hackthebox/machines writeups/Topology/htpasswd.png)
 
 
-## Shell as vdaisley - Method 1
+## **Shell as vdaisley - Method 1**
 
 If you are lazy person like me 😅 you can go to this [website](https://brandfolder.com/workbench/extract-text-from-image) and upload the hash image to get it as text
 
 ![](/assets/img/hackthebox/machines writeups/Topology/hash-string.png)
 
 
-### Cracking the hash
+### **Cracking the hash**
 
 `Hashcat` crack the hash `$apr1$1ONUB/S2$58eeNVirnRDB5zAIbIxTY0` to get the vdaisley user password which is `calculus20`
 
@@ -204,7 +202,7 @@ $apr1$1ONUB/S2$58eeNVirnRDB5zAIbIxTY0:calculus20
 ```
 {: .nolineno }
 
-### SSH - TCP 22
+### **SSH - TCP 22**
 
 Using `sshpass` to login as `vdaisley` with password `calculus20`
 
@@ -227,7 +225,7 @@ cat user.txt
 835a57cd************************.
 ```
 
-## Shell as vdaisley - Method 2
+## **Shell as vdaisley - Method 2**
 
 Found an exposed dir listing in latex Vhost home page. 
 
@@ -237,7 +235,7 @@ So using the Read file function to read the content of the `equeation.php` conte
 
 ![](/assets/img/hackthebox/machines writeups/Topology/equation_php.png)
 
-### Bypass Blacklist
+### **Bypass Blacklist**
 
 According to awesome person [Ippsec](https://ippsec.rocks/) he was reading this [blog](https://sk3rts.rocks/posts/bypassing-latex-filters/) about how to bypassing LaTeX filters where it talks about a bypass using the `\catcode` which unfortunately for my i was already read it but can't apply it 😅 .But in his case he combianed this knowledge with this [page](https://en.wikibooks.org/wiki/TeX/catcode
 ) to do the following 
@@ -254,7 +252,7 @@ As proof of concept i change the `t` char with `^^74` so the new payload will be
 
 ![](/assets/img/hackthebox/machines writeups/Topology/filter_bypass.png)
 
-### RCE
+### **RCE**
 
 Creating a simple Webshell 
 
@@ -279,7 +277,7 @@ The shell uploaded to the **tempfiles** dir so we can access it and gain RCE now
 
 ![](/assets/img/hackthebox/machines writeups/Topology/webshell2.png)
 
-## Shell as Root
+## **Shell as Root**
 
 After some enumeration found that the `/opt` dir has interesting folder, but vdaisley user can't view what is inside it but he can write to it 
 
@@ -292,7 +290,7 @@ drwx-wx-wx 2 root root 4096 Sep  7 18:00 gnuplot/
 The **gnuplot** is a command-line and GUI program that can generate two- and three-dimentional plots of functions, data, and data fits.
 
 
-### Pspy
+### **Pspy**
 
 Using `Pspy` after downlaod it from my machine to the target box to enum real time running processes
 
