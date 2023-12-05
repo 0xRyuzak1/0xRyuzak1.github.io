@@ -3,7 +3,7 @@ layout: post
 title: HTB - Cybermonday
 date: 2023-12-05 12:48 +0200
 categories: [HTB Machines]
-tags: [nmap,php,laravel,off-by-slash,nginx,gitdumper,source-code,mass-assignment,api,jwt,jwks,python-jwt,jwt-tool,jwt-algorithm-confusion,ssrf,redis,laravel-deserialization,deserialization,netstat,phpggc,docker,container,pivot,chisel,docker-registry,snyk,directory-traversal,docker-compose,docker-apparmor]  
+tags: [nmap,php,laravel,off-by-slash,Nginx,gitdumper,source-code,mass-assignment,api,jwt,jwks,python-jwt,jwt-tool,jwt-algorithm-confusion,ssrf,redis,laravel-deserialization,Deserialization,netstat,phpggc,docker,container,pivot,chisel,docker-registry,snyk,directory-traversal,docker-compose,docker-apparmor]  
 image: /assets/img/hackthebox/machines writeups/Cybermonday/Cover.png
 ---
 
@@ -766,7 +766,7 @@ Actually the `MAC` has no needs here for us in decryption it is just the Message
 }
 ```
 
-Using [cyberchef]() to make the decrypt 
+Using [cyberchef](https://gchq.github.io/CyberChef/) to make the decrypt and this is the [recipe](https://gchq.github.io/CyberChef/#recipe=From_Base64('A-Za-z0-9%2B/%3D',true,false)AES_Decrypt(%7B'option':'Base64','string':'EX3zUxJkzEAY2xM4pbOfYMJus%2Bbjx6V25Wnas%2BrFMzA%3D'%7D,%7B'option':'Base64','string':'9VblCu0%2B%2B%2BtKkdS8JhG8gg%3D%3D'%7D,'CBC','Raw','Raw',%7B'option':'Hex','string':''%7D,%7B'option':'Hex','string':''%7D)&input=UCt6bXNLakVybmY1OEZVYkdiQnpoeTBuSlcxQVFqTnh5NXR2WTJEaktDdncvcEdoTnAwQUJpbm9pSmM3bjMvcVMrWEJGZzVWUjNEMjlrSTJLZmNLeEFsZnREMVlCdlZZaXJ2WDZYeWtpbGM2MTdJNnBVU3dLck9JeWgzVTZJTWQ)
 
 
 ![](/assets/img/hackthebox/machines writeups/Cybermonday/cyberchef.png)
