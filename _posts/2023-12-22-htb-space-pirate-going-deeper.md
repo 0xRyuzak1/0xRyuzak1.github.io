@@ -22,7 +22,7 @@ We are inside D12! We bypassed the scanning system, and now we are right in fron
 
 
 
-## Challegne Files
+## Challenge Files
 
 Here is the zip file [Challenge.zip](/assets/img/hackthebox/challenges writeups/Space Pirate: Going Deeper/Challenge.zip) which contains all the needed files to solve the challenge you can downloaded it.
 
