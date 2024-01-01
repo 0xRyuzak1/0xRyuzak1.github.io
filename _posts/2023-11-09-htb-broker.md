@@ -3,7 +3,7 @@ layout: post
 title: HTB - Broker
 date: 2023-11-09 12:48 +0200
 categories: [HTB Machines]
-tags: [ActiveMQ,CVE-2023-46604,Sudoers,Basic-Auth,Deserialization,Nginx]  
+tags: [Nmap,ActiveMQ,CVE-2023-46604,Sudoers,Basic-Auth,Deserialization,Nginx]  
 image: /assets/img/hackthebox/machines writeups/Broker/Cover.png
 ---
 
@@ -33,8 +33,8 @@ Broker starts with a website that hosting a version of `Apache ActiveMQ`. Enumer
 
 Using `Nmap` to enumerate all open ports and services by doing this on two phases to speed things up :
 
-- **Phase 1 :** Make a simple scan to check for all opened `TCP` ports with high rate of checking port equel to 10000.
-- **Phase 2 :** After idetify the open ports start the sec phase to fingerprint (services, versions, etc) for each open port.
+- **Phase 1 :** Make a simple scan to check for all opened `TCP` ports with high rate of checking port equal to 10000.
+- **Phase 2 :** After identify the open ports start the sec phase to fingerprint (services, versions, etc) for each open port.
 
 
 ```bash
@@ -61,7 +61,7 @@ PORT      STATE    SERVICE
 Nmap done: 1 IP address (1 host up) scanned in 8.05 seconds
 
 
-# Detailed Scan for spesfic open ports                                                                 
+# Detailed Scan for specific open ports                                                                 
 nmap -p 22,80,1883,5672,8161,28335,43716,46319,47960,61613,61614,61616 -sC -A 10.10.11.243
 Starting Nmap 7.94 ( https://nmap.org ) at 2023-11-09 18:41 EST
 Nmap scan report for 10.10.11.243
@@ -156,7 +156,7 @@ The home page of the website is require a basic auth.
 
 ![Home Page](/assets/img/hackthebox/machines writeups/Broker/basic-auth.png)
 
-By trying some defualt creds like ( admin , admin ) we can log in and found that the version of **ActiveMQ** is **5.15.15** as detected before using nmap scan. 
+By trying some default creds like ( admin , admin ) we can log in and found that the version of **ActiveMQ** is **5.15.15** as detected before using nmap scan. 
 
 ![](/assets/img/hackthebox/machines writeups/Broker/vuln-version.png)
 
@@ -170,11 +170,11 @@ Searching for public exploits or CVE for this version and found that this versio
 ![](/assets/img/hackthebox/machines writeups/Broker/public-exploit.png)
 
 
-The vulnerability is an **Unauthenticated RCE** achived by exploiting a deserialization vulnerability in ActiveMQ then using a gadget from the Spring to load a remote XML file, which has the ability to run programs. For a more detailed look at this blog [post](https://deepkondah.medium.com/unpacking-the-apache-activemq-exploit-cve-2023-46604-92ed1c125b53).
+The vulnerability is an **Unauthenticated RCE** achieved by exploiting a deserialization vulnerability in ActiveMQ then using a gadget from the Spring to load a remote XML file, which has the ability to run programs. For a more detailed look at this blog [post](https://deepkondah.medium.com/unpacking-the-apache-activemq-exploit-cve-2023-46604-92ed1c125b53).
 
 ### **Exploiting CVE-2023–46604**
 
-Using this exploit [POC](https://github.com/evkl1d/CVE-2023-46604) by giving it the target IP and target ActiveMQ port with the hosted url for the malcious XML file.
+Using this exploit [POC](https://github.com/evkl1d/CVE-2023-46604) by giving it the target IP and target ActiveMQ port with the hosted url for the malicious XML file.
 
 The content of the XML after edit the ip address to be my attacker machine 
 
@@ -194,7 +194,6 @@ The content of the XML after edit the ip address to be my attacker machine
             </constructor-arg>
         </bean>
     </beans>
-
 ```
 
 Running the exploit and gaining a shell as activemq

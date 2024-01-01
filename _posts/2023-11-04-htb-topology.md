@@ -3,14 +3,14 @@ layout: post
 title: HTB - Topology
 date: 2023-11-04 12:48 +0200
 categories: [HTB Machines]
-tags: [LaTeX,Gnuplot,Fuff,htpasswd,Vhost,SetUID,Pspy]  
+tags: [Nmap,LaTeX,Gnuplot,Fuff,htpasswd,Vhost,SetUID,Pspy]  
 image: /assets/img/hackthebox/machines writeups/Topology/Cover.png
 ---
 
 
 ## **Summary**
 
-Topology starts with a website for a Math department which conatins multi virtual hosts. LaTeX Vhost used to convert math functions into an images. By performing `Latex injection` to gain arbitrary file read, and get the `.htpassword` file for a dev vhost, which used the same password for the user on the machine. To get the root access, Abusing a cron running `gnuplot` to create file to gain command execution as root.
+Topology starts with a website for a Math department which contains multi virtual hosts. LaTeX Vhost used to convert math functions into an images. By performing `Latex injection` to gain arbitrary file read, and get the `.htpassword` file for a dev vhost, which used the same password for the user on the machine. To get the root access, Abusing a cron running `gnuplot` to create file to gain command execution as root.
 
 ## **Machine Info**
 
@@ -33,8 +33,8 @@ Topology starts with a website for a Math department which conatins multi virtua
 
 Using `Nmap` to enumerate all open ports and services by doing this on two phases to speed things up :
 
-- **Phase 1 :** Make a simple scan to check for all opened `TCP` ports with high rate of checking port equel to 10000.
-- **Phase 2 :** After idetify the open ports start the sec phase to fingerprint (services, versions, etc) for each open port.
+- **Phase 1 :** Make a simple scan to check for all opened `TCP` ports with high rate of checking port equal to 10000.
+- **Phase 2 :** After identify the open ports start the sec phase to fingerprint (services, versions, etc) for each open port.
 
 
 ```bash
@@ -58,7 +58,7 @@ PORT      STATE    SERVICE
 
 Nmap done: 1 IP address (1 host up) scanned in 7.26 seconds
 
-# Detailed Scan for spesfic open ports                                                                 
+# Detailed Scan for specific open ports                                                                 
 nmap -p 80,22 -sC -A 10.10.11.217
 Starting Nmap 7.94 ( https://nmap.org ) at 2023-09-25 18:35 EDT
 Nmap scan report for latex.topology.htb (10.10.11.217)
@@ -122,7 +122,7 @@ After moving around in the home page and it's source code you can find a **poten
 
 #### **Virtual Hosting Enum**
 
-Using `fuff` to make Virtual hosting bruteforce found 3 differant Virtual hosts :
+Using `fuff` to make Virtual hosting bruteforce found 3 different Virtual hosts :
 - stats
 - dev
 - latex
@@ -145,12 +145,12 @@ It's a simple website used to create a .PNG file using [LaTeX](https://www.latex
 
 #### **LaTeX Injection**
 
-Servers that convert LaTeX code to PDF , Image , etc can be affected by high vuln leads to allow attackers to do the follwoing :
+Servers that convert LaTeX code to PDF , Image , etc can be affected by high vuln leads to allow attackers to do the following :
 - Read file from the server file system
-- Write files to the serverfile system
+- Write files to the server file system
 - OS command execution of the target server. 
 
-In this [post](https://exploit-notes.hdks.org/exploit/web/security-risk/latex-injection/) you can found some cool latex injecton payloads but as you can see that the backend is blacklisted some of the functions which leads to LFI or even RCE as we can see with this example paylaod `\input{/etc/passwd}`
+In this [post](https://exploit-notes.hdks.org/exploit/web/security-risk/latex-injection/) you can found some cool latex injection payloads but as you can see that the backend is blacklisted some of the functions which leads to LFI or even RCE as we can see with this example payload `\input{/etc/passwd}`
 
 ![](/assets/img/hackthebox/machines writeups/Topology/blacklist commands.png)
 
@@ -231,13 +231,13 @@ Found an exposed dir listing in latex Vhost home page.
 
 ![](/assets/img/hackthebox/machines writeups/Topology/latex_dirlisting.png)
 
-So using the Read file function to read the content of the `equeation.php` content to check the filters which blocks spesfic commands or syntax using this payload `$\lstinputlisting{../equation.php}$`.
+So using the Read file function to read the content of the `equeation.php` content to check the filters which blocks specific commands or syntax using this payload `$\lstinputlisting{../equation.php}$`.
 
 ![](/assets/img/hackthebox/machines writeups/Topology/equation_php.png)
 
 ### **Bypass Blacklist**
 
-According to awesome person [Ippsec](https://ippsec.rocks/) he was reading this [blog](https://sk3rts.rocks/posts/bypassing-latex-filters/) about how to bypassing LaTeX filters where it talks about a bypass using the `\catcode` which unfortunately for my i was already read it but can't apply it 😅 .But in his case he combianed this knowledge with this [page](https://en.wikibooks.org/wiki/TeX/catcode
+According to awesome person [Ippsec](https://ippsec.rocks/) he was reading this [blog](https://sk3rts.rocks/posts/bypassing-latex-filters/) about how to bypassing LaTeX filters where it talks about a bypass using the `\catcode` which unfortunately for my i was already read it but can't apply it 😅 .But in his case he combined this knowledge with this [page](https://en.wikibooks.org/wiki/TeX/catcode
 ) to do the following 
 
 
@@ -245,7 +245,7 @@ According to awesome person [Ippsec](https://ippsec.rocks/) he was reading this 
 - It sets the `@` character to represent `superscript` values. <br />
 - Then we can use two of them to tell LaTeX to use the `hexdecimal` value that follows after. <br />
 - According to this line in the sec post `7 = Superscript, normally ^`. <br />
-- He figure out that he may can use this `^^Ascii Code` eg. `^^77` to rpersent `W` char and it work like charm. 
+- He figure out that he may can use this `^^Ascii Code` eg. `^^77` to represent `W` char and it work like charm. 
 {: .prompt-tip }
 
 As proof of concept i change the `t` char with `^^74` so the new payload will be this `$\lstinpu^^74listing{/etc/passwd}$` and it's working 
@@ -287,12 +287,12 @@ drwx-wx-wx 2 root root 4096 Sep  7 18:00 gnuplot/
 ```
 {: .nolineno }
 
-The **gnuplot** is a command-line and GUI program that can generate two- and three-dimentional plots of functions, data, and data fits.
+The **gnuplot** is a command-line and GUI program that can generate two- and three-dimensional plots of functions, data, and data fits.
 
 
 ### **Pspy**
 
-Using `Pspy` after downlaod it from my machine to the target box to enum real time running processes
+Using `Pspy` after download it from my machine to the target box to enum real time running processes
 
 
 ```bash

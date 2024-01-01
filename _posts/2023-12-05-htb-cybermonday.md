@@ -3,14 +3,14 @@ layout: post
 title: HTB - Cybermonday
 date: 2023-12-05 12:48 +0200
 categories: [HTB Machines]
-tags: [nmap,php,laravel,off-by-slash,Nginx,gitdumper,source-code,mass-assignment,api,jwt,jwks,python-jwt,jwt-tool,jwt-algorithm-confusion,ssrf,redis,laravel-deserialization,Deserialization,netstat,phpggc,docker,container,pivot,chisel,docker-registry,snyk,directory-traversal,docker-compose,docker-apparmor]  
+tags: [Nmap,php,laravel,off-by-slash,Nginx,gitdumper,source-code,mass-assignment,api,jwt,jwks,python-jwt,jwt-tool,jwt-algorithm-confusion,SSRF,redis,laravel-deserialization,Deserialization,netstat,phpggc,docker,container,pivot,chisel,docker-registry,snyk,directory-traversal,docker-compose,docker-apparmor]  
 image: /assets/img/hackthebox/machines writeups/Cybermonday/Cover.png
 ---
 
 
 ## **Summary**
 
-CyberMonday starts with a website that is hosted using `Nginx` and created using `Laravel` as a PHP framework. The Nginx configuration was suffering from `nginxoffbyslash`, which occurs when an Nginx directive does not end with a slash. This allows us to access the `.git` directory, `.env` file and retrieve the website's Laravel code. By reviewing the code, we spot a way to escalate a user to an `admin` using the update function through `mass assignment` vulnerability then found a new subdomain for a webhooks API.By abusing `jwt algorithm confusion` we can get and admin access to create webhooks. One of webhooks is vulnerabile to `SSRF`. By abusing this `SSRF` interact with the Redis database that’s caching the Laravel session data. I’ll abuse that to get code execution in the web container. after that i found a `Docker Registry` container and pull the API container image. The Source code review shows additional API endpoints by abusing those to get file read on the API container and leak the password of a user that works for SSH. Then abuse a script designed to allow a user to run docker compose in a safe way to create a privilege container to get us root access.
+CyberMonday starts with a website that is hosted using `Nginx` and created using `Laravel` as a PHP framework. The Nginx configuration was suffering from `nginxoffbyslash`, which occurs when an Nginx directive does not end with a slash. This allows us to access the `.git` directory, `.env` file and retrieve the website's Laravel code. By reviewing the code, we spot a way to escalate a user to an `admin` using the update function through `mass assignment` vulnerability then found a new subdomain for a webhooks API.By abusing `jwt algorithm confusion` we can get and admin access to create webhooks. One of webhooks is vulnerable to `SSRF`. By abusing this `SSRF` interact with the Redis database that’s caching the Laravel session data. I’ll abuse that to get code execution in the web container. after that i found a `Docker Registry` container and pull the API container image. The Source code review shows additional API endpoints by abusing those to get file read on the API container and leak the password of a user that works for SSH. Then abuse a script designed to allow a user to run docker compose in a safe way to create a privilege container to get us root access.
 
 
 ## **Machine Info**
@@ -35,7 +35,7 @@ CyberMonday starts with a website that is hosted using `Nginx` and created using
 Using `Nmap` to enumerate all open ports and services by doing this on two phases to speed things up :
 
 - **Phase 1 :** Make a simple scan to check for all opened `TCP` ports with high rate of checking port equel to 10000.
-- **Phase 2 :** After idetify the open ports start the sec phase to fingerprint (services, versions, etc) for each open port.
+- **Phase 2 :** After identify the open ports start the sec phase to fingerprint (services, versions, etc) for each open port.
 
 
 ```console
@@ -51,7 +51,7 @@ PORT   STATE SERVICE
 
 Nmap done: 1 IP address (1 host up) scanned in 9.14 seconds
 
-# Detailed Scan for spesfic open ports     
+# Detailed Scan for specific open ports     
 (kali㉿kali)-[~/HTB/HTB Machines/Cybermonday]$ nmap -A -p 22,80 -sC 10.10.11.228
 Starting Nmap 7.94 ( https://nmap.org ) at 2023-12-02 06:52 EST
 Nmap scan report for cybermonday.htb (10.10.11.228)
@@ -103,7 +103,7 @@ The application allow user to register new accounts to be used to login to it.
 
 After login found that the user can do only two things :
 - View the products 
-- Update his informations (pass,email,etc).
+- Update his information (pass,email,etc).
 
 ![](/assets/img/hackthebox/machines writeups/Cybermonday/products.png)
 ![](/assets/img/hackthebox/machines writeups/Cybermonday/update-info.png)
@@ -111,14 +111,14 @@ After login found that the user can do only two things :
 
 #### **Nginx off by slash**
 
-I always love to run few scanner and fuzzing tools in the background while doing manual testing. One of those tools is `Nuceli` i run it in the background to check for any exposed config files and i found that the nginx confiueration is vuerlanble to nginx `off-by-slash`.
+I always love to run few scanner and fuzzing tools in the background while doing manual testing. One of those tools is `Nuceli` i run it in the background to check for any exposed config files and i found that the nginx configuration is vulnerable to nginx `off-by-slash`.
 
 ```console
 (kali㉿kali)-[~]$ echo http://cybermonday.htb|~/go/bin/nuclei -t ~/nuclei-templates/http/exposures/configs/ -silent                               
 [git-config-nginxoffbyslash] [http] [medium] http://cybermonday.htb/assets../.git/config
 ```
 
-Nginx `off-by-slash` is happend when a Nginx directive does not end with a slash, it is possible to traverse one step up.
+Nginx `off-by-slash` is happened when a Nginx directive does not end with a slash, it is possible to traverse one step up.
 
 **Example OffBySlash**
 
@@ -329,13 +329,13 @@ By reviewing the code we can found that most of the routes are already known for
 
 ![](/assets/img/hackthebox/machines writeups/Cybermonday/error.png)
 
-As per the error page there is an attempt to read property "isAdmin" on null. This means that there is an admin user which has priv to accessing the dashboard page so keep that in mind because this is a potential Priv Esclation we have to check later.
+As per the error page there is an attempt to read property "isAdmin" on null. This means that there is an admin user which has priv to accessing the dashboard page so keep that in mind because this is a potential Priv Escalation we have to check later.
 
 #### **Admin Access**
 
 ##### **Controllers**
 
-Controllers are in `app/Http/Controllers`. And the update function is in this file `ProfileController.php` which conatins the following code 
+Controllers are in `app/Http/Controllers`. And the update function is in this file `ProfileController.php` which contains the following code 
 
 
 ```php
@@ -376,11 +376,11 @@ class ProfileController extends Controller
 
 The previous code gets the current User object, and updates the data. However, there’s a mass assignment vulnerability here! 
 - **Line 12 :** It takes all the POST request fields except for `_token`, `password`, and `password_confirmation`, because those data will not be inserted in the DB.
-- **Line 15 :** Since it's not storing the password in the data object so it will retrive it from the request `$request->password` to check if it not spplied or empty.
+- **Line 15 :** Since it's not storing the password in the data object so it will retrieve it from the request `$request->password` to check if it not supplied or empty.
 - **Line 23** After the check is pass it will encrypt the pass and add it to the data object.
 - **Line 26** Then Update the DB with all supplied info which stored in the `$data` at **line 12** 
 
-According to this the code is just take the input from the user and update the DB with those data except for `_token`, `password`, and `password_confirmation` so this allow us to esclate priv by changing the content of the `isAdmin` part
+According to this the code is just take the input from the user and update the DB with those data except for `_token`, `password`, and `password_confirmation` so this allow us to escalate priv by changing the content of the `isAdmin` part
 
 ![](/assets/img/hackthebox/machines writeups/Cybermonday/admin-attempt1.png)
 

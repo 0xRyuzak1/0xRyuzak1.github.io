@@ -3,7 +3,7 @@ layout: post
 title: HTB - Pilgrimage
 date: 2023-11-25 12:48 +0200
 categories: [HTB Machines]
-tags: [Binwalk,Magick,.git,LFI,gitdumper,sqlite,Cve-2022-44268,Cve-2022-4510]  
+tags: [Nmap,Binwalk,Magick,.git,LFI,gitdumper,sqlite,Cve-2022-44268,Cve-2022-4510]  
 image: /assets/img/hackthebox/machines writeups/Pilgrimage/Cover.png
 ---
 
@@ -33,8 +33,8 @@ Pilgrimage starts with a website that hosted using Nginx which aimed to help use
 
 Using `Nmap` to enumerate all open ports and services by doing this on two phases to speed things up :
 
-- **Phase 1 :** Make a simple scan to check for all opened `TCP` ports with high rate of checking port equel to 10000.
-- **Phase 2 :** After idetify the open ports start the sec phase to fingerprint (services, versions, etc) for each open port.
+- **Phase 1 :** Make a simple scan to check for all opened `TCP` ports with high rate of checking port equal to 10000.
+- **Phase 2 :** After identify the open ports start the sec phase to fingerprint (services, versions, etc) for each open port.
 
 
 ```bash
@@ -51,7 +51,7 @@ PORT   STATE SERVICE
 Nmap done: 1 IP address (1 host up) scanned in 32.26 seconds
 
 
-# Detailed Scan for spesfic open ports                                                                 
+# Detailed Scan for specific open ports                                                                 
 nmap -A -p 22,80 -sC 10.10.11.219
 Starting Nmap 7.94 ( https://nmap.org ) at 2023-11-25 06:39 EST
 Nmap scan report for pilgrimage.htb (10.10.11.219)
@@ -155,7 +155,7 @@ This as we can see dump the content of the git repo to a directory called git
 
 #### Source Code Analysis
 
-After go through the code found this spesfic php code in `index.php` page 
+After go through the code found this specific php code in `index.php` page 
 
 ```php
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -281,7 +281,7 @@ Traceback (most recent call last):
 UnicodeDecodeError: 'utf-8' codec can't decode byte 0x8f in position 27: invalid start byte
 ```
 
-The previous error is appears because this is a SQLite file not normal ASCII text file so i downlaod the image manually and with a little of bash i can get the sqlite db file.
+The previous error is appears because this is a SQLite file not normal ASCII text file so i download the image manually and with a little of bash i can get the sqlite db file.
 
 ```console
 (kali㉿kali)-[~]$ identify -verbose ~/Downloads/6563b08379ecc.png |grep -i 'Raw profile type' -A 1000 |tail -n +4|tr -d '\n' |grep -oE '[a-zA-Z0-9]{100,}'|xxd -r -p > db.sqlite
@@ -333,7 +333,7 @@ emily@pilgrimage:~$ cat user.txt
 
 #### Sudoers
 
-Check if emily user have permssions to run sudo 
+Check if emily user have permissions to run sudo 
 
 
 ```console
