@@ -1,7 +1,7 @@
 ---
 layout: post
 title: CTF - My Friend, A Loathsome Worm
-date: 2023-12-26 14:50 +0200
+date: 2024-01-1 12:02 +0200
 categories: [Exploit Development,CTF - Challenges]
 tags: [Pwn,Checksec,Ghidra,Not Stripped,Scanf(),Python,Disassemble,Dynamically Linked]  
 image: "/assets/img/ctf/pwn/My Friend, A Loathsome Worm/Cover.svg"
